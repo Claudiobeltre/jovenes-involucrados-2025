@@ -26,10 +26,15 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 <span>Preguntas</span>
             </button>
-            <button id="btn-install" class="btn-nav btn-nav--highlight hidden">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                <span>Instalar</span>
-            </button>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <button id="btn-settings" class="btn-icon-only" aria-label="Configuración" title="Configuración">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </button>
+                <button id="btn-install" class="btn-nav btn-nav--highlight hidden">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    <span>Instalar</span>
+                </button>
+            </div>
         </div>
         <div class="hero-header">
             <div class="hero-glow"></div>
@@ -149,6 +154,40 @@
             <div class="modal-actions">
                 <button id="btn-modal-cancel" class="btn-secondary">Cancelar</button>
                 <button id="btn-modal-confirm" class="btn-primary" style="background: rgba(239,68,68,.1); color: #f87171; border: 1px solid rgba(239,68,68,.3); box-shadow: none;">Sí, reiniciar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Configuración -->
+    <div id="modal-settings" class="modal-overlay hidden">
+        <div class="modal-card" style="padding: 1.5rem; max-width: 340px;">
+            <div class="modal-header">
+                <h3 class="modal-title" style="margin-bottom: 0;">Configuración</h3>
+                <button id="btn-close-settings" class="btn-icon-only" aria-label="Cerrar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="settings-group">
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-icon">🔊</div>
+                        <div class="setting-text">Efectos de sonido</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-sound">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-icon">📳</div>
+                        <div class="setting-text">Vibración</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-vibration">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
             </div>
         </div>
     </div>
