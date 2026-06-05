@@ -12,6 +12,56 @@
     answers: []
   };
 
+  // Configuration
+  let settings = {
+    sound: localStorage.getItem('ji2026_sound') !== 'false',
+    vibration: localStorage.getItem('ji2026_vibration') !== 'false'
+  };
+
+  // --- SOUND MANAGER (Web Audio API) ---
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  
+  function playTone(freq, type, duration, vol=0.1) {
+    if (!settings.sound || audioCtx.state === 'suspended') return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  }
+
+  function playDing() {
+    if (!settings.sound) return;
+    resumeAudio();
+    playTone(800, 'sine', 0.1, 0.1);
+    setTimeout(() => playTone(1200, 'sine', 0.2, 0.1), 100);
+  }
+
+  function playBloop() {
+    if (!settings.sound) return;
+    resumeAudio();
+    playTone(300, 'square', 0.15, 0.05);
+    setTimeout(() => playTone(200, 'square', 0.2, 0.05), 100);
+  }
+
+  function playTada() {
+    if (!settings.sound) return;
+    resumeAudio();
+    playTone(523.25, 'sine', 0.1, 0.1); // C5
+    setTimeout(() => playTone(659.25, 'sine', 0.1, 0.1), 100); // E5
+    setTimeout(() => playTone(783.99, 'sine', 0.1, 0.1), 200); // G5
+    setTimeout(() => playTone(1046.50, 'sine', 0.4, 0.1), 300); // C6
+  }
+
+  function resumeAudio() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  }
+
   let deferredPrompt;
   const btnInstall = $('btn-install');
 
@@ -176,6 +226,7 @@
   }
 
   function vibrate(pattern) {
+    if (!settings.vibration) return;
     if (navigator.vibrate) {
       try { navigator.vibrate(pattern); } catch(e) {}
     }
@@ -344,6 +395,7 @@
         else ring.style.stroke = '#ef4444'; // Red
       }, 100);
 
+      playTada();
       startConfetti();
       return; 
     }
@@ -426,9 +478,11 @@
     if (isCorrect) {
       state.correctCount++;
       vibrate(50);
+      playDing();
     } else {
       state.incorrectCount++;
       vibrate([50, 50, 50]);
+      playBloop();
       if (currentCategory !== 'repasar_errores') {
         saveToRepasarErrores({ ...q, _srcCat: q._srcCat || currentCategory });
       }
@@ -761,6 +815,34 @@
       }
     }
   }
+
+  // Config UI Setup
+  const toggleSound = $('toggle-sound');
+  const toggleVibration = $('toggle-vibration');
+  if (toggleSound) toggleSound.checked = settings.sound;
+  if (toggleVibration) toggleVibration.checked = settings.vibration;
+
+  toggleSound?.addEventListener('change', (e) => {
+    settings.sound = e.target.checked;
+    localStorage.setItem('ji2026_sound', settings.sound);
+    if (settings.sound) resumeAudio();
+  });
+
+  toggleVibration?.addEventListener('change', (e) => {
+    settings.vibration = e.target.checked;
+    localStorage.setItem('ji2026_vibration', settings.vibration);
+    if (settings.vibration) vibrate(20);
+  });
+
+  $('btn-settings')?.addEventListener('click', () => {
+    vibrate(20);
+    $('modal-settings').classList.remove('hidden');
+  });
+
+  $('btn-close-settings')?.addEventListener('click', () => {
+    vibrate(20);
+    $('modal-settings').classList.add('hidden');
+  });
 
   // Init
   initCategories();
