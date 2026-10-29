@@ -704,8 +704,10 @@
   // DÍGALO COMO PUEDA
   const DIGALO_CATS = { personajes: ['👤', 'Personaje'], lugares: ['📍', 'Lugar'], objetos: ['🏺', 'Objeto'] };
   const RING_LENGTH = 327; // 2 * PI * r (52)
+  const DIGALO_DURATIONS = [30, 45, 60, 90];
+  const savedDuration = parseInt(localStorage.getItem('ji2026_digalo_time'));
   const digalo = {
-    duration: parseInt(localStorage.getItem('ji2026_digalo_time')) || 60,
+    duration: DIGALO_DURATIONS.includes(savedDuration) ? savedDuration : 60,
     remaining: 0,
     endTime: 0,
     running: false,

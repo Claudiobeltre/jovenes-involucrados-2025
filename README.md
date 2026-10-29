@@ -15,7 +15,7 @@ Una **Progressive Web App (PWA)** diseñada para que los jóvenes de la Iglesia 
 *   **Modo Listado y Búsqueda:** Una pantalla dedicada para leer todas las 152 preguntas de corrido, con un buscador en tiempo real para encontrar rápidamente por palabras clave o lección, separado por pestañas temáticas.
 *   **Guardado Automático de Progreso:** La aplicación guarda tu avance localmente. Puedes cerrar la app y al volver retomarás exactamente en la pregunta donde te quedaste.
 *   **Sistema de Rachas (Streaks) 🔥:** Registra cuántos días consecutivos has entrado a estudiar para mantenerte motivado.
-*   **Dígalo como pueda ⏱️:** Sale un tema al azar con una pista de contexto; el cronómetro (30 s, 1 min, 1:30 o 2 min) se inicia con un botón, avisa con tics en los últimos 5 segundos y suena una alarma al llegar a cero. Los temas no se repiten hasta que salgan todos.
+*   **Dígalo como pueda ⏱️:** Sale un tema al azar con una pista de contexto; el cronómetro (30 s, 45 s, 1 min o 1:30) se inicia con un botón, avisa con tics en los últimos 5 segundos y suena una alarma al llegar a cero. Los temas no se repiten hasta que salgan todos.
 *   **Feedback Visual Animado:** Anillo circular de puntaje al completar categorías y lluvia de confetti animado al terminar el repaso de una sección.
 
 ## 🗂️ Categorías de Estudio
