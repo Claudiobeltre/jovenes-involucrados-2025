@@ -1,7 +1,16 @@
 (() => {
   const $ = id => document.getElementById(id);
-  const screens = { categories: $('screen-categories'), quiz: $('screen-quiz'), complete: $('screen-complete'), repaso: $('screen-repaso') };
-  const CATEGORY_NAMES = { hora_silenciosa: 'Hora Silenciosa', discipulado: 'Disipulado', versiculos: 'Memorización', lecciones: 'Lecciones', todas: 'Todas las Categorías', repasar_errores: 'Preguntas para Repasar' };
+  const screens = { home: $('screen-home'), categories: $('screen-categories'), comp: $('screen-comp'), quiz: $('screen-quiz'), complete: $('screen-complete'), repaso: $('screen-repaso'), digalo: $('screen-digalo') };
+  const CATEGORY_NAMES = { hora_silenciosa: 'Hora Silenciosa', discipulado: 'Discipulado', versiculos: 'Memorización', lecciones: 'Lecciones', todas: 'Todas las Categorías', repasar_errores: 'Preguntas para Repasar', competencia: 'Competencia IBCJ', comp_repasar: 'Preguntas para Repasar' };
+
+  // Secciones: Jóvenes Involucrados (ji) y Competencia IBCJ (comp)
+  const SECTION_DATA = { ji: QUESTIONS, comp: COMP_QUESTIONS };
+  const ERRORS_CAT = { ji: 'repasar_errores', comp: 'comp_repasar' };
+  const MENU_SCREEN = { ji: 'categories', comp: 'comp' };
+  const MENU_SCREENS = ['home', 'categories', 'comp'];
+  let currentSection = 'ji';
+  const sectionData = () => SECTION_DATA[currentSection];
+  const isErrorsCat = cat => cat === 'repasar_errores' || cat === 'comp_repasar';
 
   let currentCategory = '';
   let state = {
@@ -20,9 +29,10 @@
 
   // --- SOUND MANAGER (Web Audio API) ---
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  
-  function playTone(freq, type, duration, vol=0.1) {
-    if (!settings.sound || audioCtx.state === 'suspended') return;
+
+  // force: suena aunque los efectos estén apagados (cronómetro de Dígalo)
+  function playTone(freq, type, duration, vol=0.1, force=false) {
+    if ((!settings.sound && !force) || audioCtx.state === 'suspended') return;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = type;
@@ -56,6 +66,19 @@
     setTimeout(() => playTone(659.25, 'sine', 0.1, 0.1), 100); // E5
     setTimeout(() => playTone(783.99, 'sine', 0.1, 0.1), 200); // G5
     setTimeout(() => playTone(1046.50, 'sine', 0.4, 0.1), 300); // C6
+  }
+
+  function playTick() {
+    resumeAudio();
+    playTone(1000, 'sine', 0.08, 0.15, true);
+  }
+
+  function playAlarm() {
+    resumeAudio();
+    for (let i = 0; i < 3; i++) {
+      setTimeout(() => playTone(880, 'square', 0.18, 0.2, true), i * 450);
+      setTimeout(() => playTone(1175, 'square', 0.22, 0.2, true), i * 450 + 200);
+    }
   }
 
   function resumeAudio() {
@@ -93,48 +116,57 @@
     deferredPrompt = null;
   });
 
-  function initCategories() {
+  function initHome() {
     updateStreak();
-    
-    const repasarList = getRepasarErrores();
-    $('count-repasar_errores').textContent = `${repasarList.length} preguntas`;
+  }
+
+  function initMenu() {
+    const data = sectionData();
+    const errCat = ERRORS_CAT[currentSection];
+    const repasarList = getRepasarErrores(errCat);
+    const clearBtn = $('btn-clear-' + errCat);
+    $('count-' + errCat).textContent = `${repasarList.length} preguntas`;
     if (repasarList.length > 0) {
-      QUESTIONS['repasar_errores'] = repasarList;
-      updateProgressUI('repasar_errores', repasarList.length);
-      if ($('btn-clear-repaso-home')) $('btn-clear-repaso-home').classList.remove('hidden');
+      data[errCat] = repasarList;
+      updateProgressUI(errCat, repasarList.length);
+      if (clearBtn) clearBtn.classList.remove('hidden');
     } else {
-      delete QUESTIONS['repasar_errores'];
-      const progEl = $('prog-repasar_errores');
+      delete data[errCat];
+      const progEl = $('prog-' + errCat);
       if (progEl) progEl.style.width = '0%';
-      if ($('btn-clear-repaso-home')) $('btn-clear-repaso-home').classList.add('hidden');
+      if (clearBtn) clearBtn.classList.add('hidden');
     }
 
     let totalAll = 0;
-    Object.keys(QUESTIONS).forEach(k => {
-      if (k === 'repasar_errores') return;
-      const count = QUESTIONS[k].length;
+    Object.keys(data).forEach(k => {
+      if (isErrorsCat(k)) return;
+      const count = data[k].length;
       totalAll += count;
       const elCount = $('count-' + k);
       if (elCount) elCount.textContent = count + ' preguntas';
       updateProgressUI(k, count);
     });
-    
-    $('count-todas').textContent = totalAll + ' preguntas';
-    updateProgressUI('todas', totalAll);
+
+    if (currentSection === 'ji') {
+      $('count-todas').textContent = totalAll + ' preguntas';
+      updateProgressUI('todas', totalAll);
+    } else {
+      $('count-digalo').textContent = DIGALO_TOPICS.length + ' temas';
+    }
   }
 
   function updateStreak() {
     const lastVisit = localStorage.getItem('ji2026_last_visit');
     let streak = parseInt(localStorage.getItem('ji2026_streak') || '0');
     const todayStr = new Date().toDateString();
-    
+
     if (lastVisit !== todayStr) {
       if (lastVisit) {
         // Reset to 00:00:00 to calculate purely by days
         const lastDate = new Date(lastVisit);
         const today = new Date(todayStr);
         const diffTime = today - lastDate;
-        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)); 
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
         if (diffDays === 1) streak++;
         else if (diffDays > 1) streak = 1;
       } else {
@@ -143,7 +175,7 @@
       localStorage.setItem('ji2026_last_visit', todayStr);
       localStorage.setItem('ji2026_streak', streak);
     }
-    
+
     const badge = $('streak-badge');
     const count = $('streak-count');
     if(badge && count) {
@@ -160,7 +192,7 @@
     const saved = loadProgress(cat);
     const progEl = $('prog-' + cat);
     if (!progEl) return;
-    
+
     if (saved && saved.shuffled && saved.shuffled.length > 0) {
       const pct = (saved.currentIndex / saved.shuffled.length) * 100;
       progEl.style.width = pct + '%';
@@ -170,13 +202,13 @@
   }
 
   function saveProgress() {
-    if (!currentCategory || currentCategory === 'repasar_errores') return;
+    if (!currentCategory || isErrorsCat(currentCategory)) return;
     localStorage.setItem('ji2026_state_' + currentCategory, JSON.stringify(state));
     updateProgressUI(currentCategory, state.shuffled.length);
   }
 
   function loadProgress(cat) {
-    if (cat === 'repasar_errores') return null;
+    if (isErrorsCat(cat)) return null;
     const saved = localStorage.getItem('ji2026_state_' + cat);
     if (!saved) return null;
     try {
@@ -189,40 +221,40 @@
   }
 
   function clearProgress(cat) {
-    if (cat === 'repasar_errores') return;
+    if (isErrorsCat(cat)) return;
     localStorage.removeItem('ji2026_state_' + cat);
     updateProgressUI(cat, 0);
   }
 
-  // Repasar Errores Helpers
-  function getRepasarErrores() {
-    const saved = localStorage.getItem('ji2026_repasar_errores');
+  // Repasar Errores Helpers (una lista por sección: ji2026_repasar_errores / ji2026_comp_repasar)
+  function getRepasarErrores(cat) {
+    const saved = localStorage.getItem('ji2026_' + cat);
     if (!saved) return [];
     try {
       return JSON.parse(saved);
     } catch (e) {
-      console.warn('Error parsing repasar_errores', e);
-      clearRepasarErrores();
+      console.warn('Error parsing', cat, e);
+      clearRepasarErrores(cat);
       return [];
     }
   }
 
-  function saveToRepasarErrores(q) {
-    let list = getRepasarErrores();
+  function saveToRepasarErrores(cat, q) {
+    let list = getRepasarErrores(cat);
     if (!list.some(item => item.q === q.q)) {
       list.push(q);
-      localStorage.setItem('ji2026_repasar_errores', JSON.stringify(list));
+      localStorage.setItem('ji2026_' + cat, JSON.stringify(list));
     }
   }
 
-  function removeFromRepasarErrores(questionText) {
-    let list = getRepasarErrores();
+  function removeFromRepasarErrores(cat, questionText) {
+    let list = getRepasarErrores(cat);
     list = list.filter(item => item.q !== questionText);
-    localStorage.setItem('ji2026_repasar_errores', JSON.stringify(list));
+    localStorage.setItem('ji2026_' + cat, JSON.stringify(list));
   }
 
-  function clearRepasarErrores() {
-    localStorage.removeItem('ji2026_repasar_errores');
+  function clearRepasarErrores(cat) {
+    localStorage.removeItem('ji2026_' + cat);
   }
 
   function vibrate(pattern) {
@@ -233,33 +265,24 @@
   }
 
   // Historial para botón físico 'Atrás' en móviles
-  history.replaceState({ screen: 'categories' }, '');
+  history.replaceState({ screen: 'home' }, '');
 
   window.addEventListener('popstate', (e) => {
-    if (!screens.categories.classList.contains('active')) {
-      initCategories();
-      const update = () => {
-        Object.values(screens).forEach(s => s.classList.remove('active'));
-        screens.categories.classList.add('active');
-      };
-      if (document.startViewTransition) { document.startViewTransition(update); } else { update(); }
-    }
+    stopTimer();
+    renderScreen((e.state && e.state.screen) || 'home');
   });
 
-  function goHome() {
-    vibrate(20);
-    if (history.state && history.state.screen !== 'categories') {
-      history.back();
-    } else {
-      initCategories();
-      showScreen('categories');
+  function refreshScreen(name) {
+    if (name === 'home') initHome();
+    else if (name === 'categories' || name === 'comp') {
+      currentSection = name === 'comp' ? 'comp' : 'ji';
+      initMenu();
     }
   }
 
-  function showScreen(name) {
-    if (name !== 'categories' && screens.categories.classList.contains('active')) {
-      history.pushState({ screen: name }, '');
-    }
+  // Muestra una pantalla sin tocar el historial
+  function renderScreen(name) {
+    refreshScreen(name);
     const update = () => {
       Object.values(screens).forEach(s => s.classList.remove('active'));
       screens[name].classList.add('active');
@@ -269,6 +292,29 @@
     } else {
       update();
     }
+  }
+
+  function showScreen(name) {
+    const activeName = Object.keys(screens).find(k => screens[k].classList.contains('active'));
+    if (name !== activeName && MENU_SCREENS.includes(activeName)) {
+      history.pushState({ screen: name }, '');
+    }
+    renderScreen(name);
+  }
+
+  // Vuelve una pantalla atrás (al menú de la sección, o al inicio desde un menú)
+  function navBack(fallback) {
+    vibrate(20);
+    stopTimer();
+    if (history.state && history.state.screen !== 'home') {
+      history.back();
+    } else {
+      renderScreen(fallback);
+    }
+  }
+
+  function goHome() {
+    navBack(MENU_SCREEN[currentSection]);
   }
 
   let confirmAction = null;
@@ -293,8 +339,8 @@
   function buildMetaTags(q, category) {
     let html = '';
     const tag = (cls, icon, text) => `<span class="meta-tag meta-tag--${cls}">${icon} ${text}</span>`;
-    const srcCat = q._srcCat || (category === 'repasar_errores' ? 'repasar_errores' : category);
-    
+    const srcCat = q._srcCat || category;
+
     // 1. Categoría
     const catName = CATEGORY_NAMES[srcCat] || 'Repaso';
     html += tag('carpeta', '🏷️', catName);
@@ -318,14 +364,15 @@
 
   function startCategory(cat, forceRestart = false) {
     currentCategory = cat;
+    const data = sectionData();
     const saved = loadProgress(cat);
 
     // Validate if saved state matches current database length
     let expectedLength = 0;
     if (cat === 'todas') {
-      Object.keys(QUESTIONS).forEach(k => { if (k !== 'repasar_errores') expectedLength += QUESTIONS[k].length; });
+      Object.keys(data).forEach(k => { if (!isErrorsCat(k)) expectedLength += data[k].length; });
     } else {
-      expectedLength = (QUESTIONS[cat] || []).length;
+      expectedLength = (data[cat] || []).length;
     }
 
     if (saved && !forceRestart) {
@@ -340,12 +387,12 @@
     if (!saved || forceRestart) {
       let questions = [];
       if (cat === 'todas') {
-        Object.keys(QUESTIONS).forEach(k => {
-          if (k === 'repasar_errores') return;
-          QUESTIONS[k].forEach(q => questions.push({ ...q, _srcCat: k }));
+        Object.keys(data).forEach(k => {
+          if (isErrorsCat(k)) return;
+          data[k].forEach(q => questions.push({ ...q, _srcCat: k }));
         });
       } else {
-        questions = QUESTIONS[cat] || [];
+        questions = data[cat] || [];
       }
       state = {
         shuffled: shuffle(questions),
@@ -364,26 +411,26 @@
   }
 
   function showQuestion() {
-    if (state.currentIndex >= state.shuffled.length) { 
+    if (state.currentIndex >= state.shuffled.length) {
       // Complete
       const total = state.shuffled.length;
       const pct = Math.round((state.correctCount / total) * 100) || 0;
-      
+
       $('score-detail').textContent = `${state.correctCount} / ${total} correctas`;
       $('score-pct').textContent = '0%';
       $('score-ring-fill').style.strokeDashoffset = 327; // Reset ring
-      
-      showScreen('complete'); 
+
+      showScreen('complete');
       clearProgress(currentCategory);
 
-      if (currentCategory === 'repasar_errores') {
+      if (isErrorsCat(currentCategory)) {
         $('btn-replay').classList.add('hidden');
         $('btn-clear-errores').classList.remove('hidden');
       } else {
         $('btn-replay').classList.remove('hidden');
         $('btn-clear-errores').classList.add('hidden');
       }
-      
+
       // Animate score ring
       setTimeout(() => {
         const offset = 327 - (327 * pct / 100);
@@ -397,21 +444,29 @@
 
       playTada();
       startConfetti();
-      return; 
+      return;
     }
-    
+
     const q = state.shuffled[state.currentIndex];
     $('quiz-current').textContent = state.currentIndex + 1;
     $('question-text').textContent = q.q;
     $('question-meta').innerHTML = buildMetaTags(q, currentCategory);
     $('answer-text').textContent = q.a;
 
-    if (currentCategory === 'repasar_errores') {
+    const citaEl = $('answer-cita');
+    if (q.cita) {
+      citaEl.textContent = '📖 ' + q.cita;
+      citaEl.classList.remove('hidden');
+    } else {
+      citaEl.classList.add('hidden');
+    }
+
+    if (isErrorsCat(currentCategory)) {
       $('btn-delete-error').classList.remove('hidden');
     } else {
       $('btn-delete-error').classList.add('hidden');
     }
-    
+
     $('answer-section').classList.add('hidden');
     $('btn-reveal').classList.remove('hidden');
     $('action-score').classList.add('hidden');
@@ -433,7 +488,7 @@
       $('review-result-icon').textContent = wasCorrect ? '✓' : '✗';
       $('review-result-text').textContent = wasCorrect ? 'Lo sabías' : 'No lo sabías';
     }
-    
+
     let anim = 'slideUp .4s ease';
     if (typeof window.lastQuestionIndex !== 'undefined' && window.lastQuestionCategory === currentCategory) {
        if (state.currentIndex > window.lastQuestionIndex) anim = 'slideInRight .35s ease';
@@ -449,11 +504,11 @@
     qCard.style.animation = 'none';
     aSec.style.animation = 'none';
     rRes.style.animation = 'none';
-    
+
     // Forzar reflow para reiniciar la animación sin saltos visuales
     void qCard.offsetWidth;
-    
-    qCard.style.animation = anim; 
+
+    qCard.style.animation = anim;
     if (alreadyAnswered) {
       aSec.style.animation = anim;
       rRes.style.animation = anim;
@@ -461,7 +516,7 @@
       aSec.style.animation = '';
       rRes.style.animation = '';
     }
-    
+
     $('progress-bar').style.width = ((state.currentIndex) / state.shuffled.length) * 100 + '%';
 
     // Show/hide previous button
@@ -483,11 +538,11 @@
       state.incorrectCount++;
       vibrate([50, 50, 50]);
       playBloop();
-      if (currentCategory !== 'repasar_errores') {
-        saveToRepasarErrores({ ...q, _srcCat: q._srcCat || currentCategory });
+      if (!isErrorsCat(currentCategory)) {
+        saveToRepasarErrores(ERRORS_CAT[currentSection], { ...q, _srcCat: q._srcCat || currentCategory });
       }
     }
-    
+
     state.answers[state.currentIndex] = isCorrect;
     state.currentIndex++;
     saveProgress();
@@ -549,15 +604,17 @@
   let currentRepasoCategory = 'todas';
 
   function initRepaso() {
+    const data = sectionData();
     allRepasoQuestions = [];
-    Object.keys(QUESTIONS).forEach(k => {
-      QUESTIONS[k].forEach(q => allRepasoQuestions.push({ ...q, _srcCat: q._srcCat || k, isRepaso: k === 'repasar_errores' }));
+    Object.keys(data).forEach(k => {
+      data[k].forEach(q => allRepasoQuestions.push({ ...q, _srcCat: q._srcCat || k, isRepaso: isErrorsCat(k) }));
     });
-    
+
     const tabsContainer = $('repaso-tabs');
     if (tabsContainer) {
       tabsContainer.innerHTML = '';
-      const catKeys = ['todas', ...Object.keys(QUESTIONS)];
+      // En Competencia solo hay un grupo de preguntas: 'Todas' + lista de repaso
+      const catKeys = ['todas', ...Object.keys(data).filter(k => currentSection === 'ji' || isErrorsCat(k))];
       catKeys.forEach(k => {
         const btn = document.createElement('button');
         btn.className = `repaso-tab ${k === currentRepasoCategory ? 'active' : ''}`;
@@ -578,25 +635,25 @@
        document.querySelectorAll('.repaso-tab').forEach(t => t.classList.remove('active'));
        if (tabsContainer.firstChild) tabsContainer.firstChild.classList.add('active');
     }
-    
+
     filterRepaso();
   }
 
   function renderRepaso(questions) {
     const list = $('repaso-list');
     list.innerHTML = '';
-    
+
     if (questions.length === 0) {
-      list.innerHTML = `<div style="text-align:center; padding: 2rem; color: rgba(255,255,255,.5);">No se encontraron preguntas.</div>`;
+      list.innerHTML = `<div style="text-align:center; padding: 2rem; opacity: .5;">No se encontraron preguntas.</div>`;
       return;
     }
 
     questions.forEach((q, i) => {
       const item = document.createElement('div');
       item.className = 'repaso-item';
-      
+
       const meta = buildMetaTags(q, 'repaso');
-      
+
       item.innerHTML = `
         <div class="repaso-question">
           <div>
@@ -605,15 +662,15 @@
           </div>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
         </div>
-        <div class="repaso-answer">${q.a}</div>
+        <div class="repaso-answer">${q.a}${q.cita ? `<div class="answer-cita">📖 ${q.cita}</div>` : ''}</div>
       `;
-      
+
       item.querySelector('.repaso-question').addEventListener('click', () => {
         const isOpen = item.classList.contains('open');
         document.querySelectorAll('.repaso-item').forEach(el => el.classList.remove('open'));
         if (!isOpen) item.classList.add('open');
       });
-      
+
       list.appendChild(item);
     });
   }
@@ -621,21 +678,22 @@
   function filterRepaso() {
     const term = $('repaso-search').value.toLowerCase();
     let filtered = allRepasoQuestions;
-    
-    if (currentRepasoCategory === 'repasar_errores') {
+
+    if (isErrorsCat(currentRepasoCategory)) {
       filtered = filtered.filter(q => q.isRepaso);
     } else if (currentRepasoCategory !== 'todas') {
       filtered = filtered.filter(q => q._srcCat === currentRepasoCategory && !q.isRepaso);
     } else {
       filtered = filtered.filter(q => !q.isRepaso);
     }
-    
+
     if (term) {
-      filtered = filtered.filter(q => 
-        q.q.toLowerCase().includes(term) || 
+      filtered = filtered.filter(q =>
+        q.q.toLowerCase().includes(term) ||
         q.a.toLowerCase().includes(term) ||
         (q.leccion && q.leccion.toLowerCase().includes(term)) ||
-        (q.leccion_titulo && q.leccion_titulo.toLowerCase().includes(term))
+        (q.leccion_titulo && q.leccion_titulo.toLowerCase().includes(term)) ||
+        (q.cita && q.cita.toLowerCase().includes(term))
       );
     }
     renderRepaso(filtered);
@@ -643,30 +701,205 @@
 
   $('repaso-search').addEventListener('input', filterRepaso);
 
-  // Events
-  document.querySelectorAll('.category-card').forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (btn.id === 'card-repasar-errores') {
-        if (getRepasarErrores().length === 0) {
-          showConfirmModal('Lista Vacía', 'Aquí podrás repasar las preguntas que no te sepas. Se guardarán automáticamente cuando te equivoques en otras categorías.', 'Entendido', null);
-          return;
-        }
-        startCategory('repasar_errores');
-      }
-      else startCategory(btn.dataset.category);
+  // DÍGALO COMO PUEDA
+  const DIGALO_CATS = { personajes: ['👤', 'Personaje'], lugares: ['📍', 'Lugar'], objetos: ['🏺', 'Objeto'] };
+  const RING_LENGTH = 327; // 2 * PI * r (52)
+  const DIGALO_DURATIONS = [30, 45, 60, 90];
+  const savedDuration = parseInt(localStorage.getItem('ji2026_digalo_time'));
+  const digalo = {
+    duration: DIGALO_DURATIONS.includes(savedDuration) ? savedDuration : 60,
+    remaining: 0,
+    endTime: 0,
+    running: false,
+    finished: false,
+    interval: null,
+    lastSecond: null,
+    deck: null
+  };
+  let wakeLock = null;
+
+  // Mazo barajado: no se repite un tema hasta haber salido todos
+  function newDeck() {
+    return { order: shuffle(DIGALO_TOPICS.map((_, i) => i)), index: 0 };
+  }
+
+  function loadDeck() {
+    let deck = null;
+    try { deck = JSON.parse(localStorage.getItem('ji2026_digalo_deck')); } catch (e) {}
+    if (!deck || !Array.isArray(deck.order) || deck.order.length !== DIGALO_TOPICS.length) deck = newDeck();
+    return deck;
+  }
+
+  function openDigalo() {
+    digalo.deck = loadDeck();
+    showTopic();
+    resetTimer();
+    showScreen('digalo');
+  }
+
+  function showTopic() {
+    if (digalo.deck.index >= digalo.deck.order.length) digalo.deck = newDeck();
+    localStorage.setItem('ji2026_digalo_deck', JSON.stringify(digalo.deck));
+
+    const topic = DIGALO_TOPICS[digalo.deck.order[digalo.deck.index]];
+    const [icon, label] = DIGALO_CATS[topic.cat];
+    $('digalo-cat').innerHTML = `<span class="meta-tag meta-tag--carpeta">${icon} ${label}</span>`;
+    $('digalo-topic').textContent = topic.t;
+    $('digalo-context').textContent = topic.c;
+    $('digalo-progress').textContent = `Tema ${digalo.deck.index + 1} / ${digalo.deck.order.length}`;
+
+    const card = $('digalo-card');
+    card.style.animation = 'none';
+    void card.offsetWidth;
+    card.style.animation = 'slideInRight .35s ease';
+  }
+
+  function nextTopic() {
+    vibrate(20);
+    digalo.deck.index++;
+    showTopic();
+    resetTimer();
+  }
+
+  function resetTimer() {
+    stopTimer();
+    digalo.remaining = digalo.duration * 1000;
+    digalo.finished = false;
+    $('digalo-body').classList.remove('time-up');
+    updateTimerUI();
+  }
+
+  function startTimer() {
+    resumeAudio();
+    vibrate(20);
+    digalo.endTime = Date.now() + digalo.remaining;
+    digalo.running = true;
+    digalo.lastSecond = Math.ceil(digalo.remaining / 1000);
+    digalo.interval = setInterval(tickTimer, 100);
+    requestWakeLock();
+    updateTimerUI();
+  }
+
+  function pauseTimer() {
+    vibrate(20);
+    digalo.remaining = Math.max(0, digalo.endTime - Date.now());
+    stopTimer();
+    updateTimerUI();
+  }
+
+  function stopTimer() {
+    clearInterval(digalo.interval);
+    digalo.interval = null;
+    digalo.running = false;
+    releaseWakeLock();
+  }
+
+  function tickTimer() {
+    // Se calcula contra la hora de fin para no desfasarse si el teléfono se bloquea
+    digalo.remaining = Math.max(0, digalo.endTime - Date.now());
+    const secs = Math.ceil(digalo.remaining / 1000);
+    if (secs !== digalo.lastSecond) {
+      digalo.lastSecond = secs;
+      if (secs > 0 && secs <= 5) { playTick(); vibrate(30); }
+    }
+    if (digalo.remaining <= 0) {
+      finishTimer();
+      return;
+    }
+    updateTimerUI();
+  }
+
+  function finishTimer() {
+    stopTimer();
+    digalo.remaining = 0;
+    digalo.finished = true;
+    playAlarm();
+    vibrate([400, 150, 400, 150, 600]);
+    $('digalo-body').classList.remove('time-up');
+    void $('digalo-body').offsetWidth;
+    $('digalo-body').classList.add('time-up');
+    updateTimerUI();
+  }
+
+  function updateTimerUI() {
+    const secs = Math.ceil(digalo.remaining / 1000);
+    $('digalo-time').textContent = `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
+    $('digalo-ring').style.strokeDashoffset = RING_LENGTH * (1 - digalo.remaining / (digalo.duration * 1000));
+    $('digalo-timer').classList.toggle('timer--warning', secs <= 5);
+
+    const btnStart = $('btn-digalo-start');
+    if (digalo.finished) btnStart.textContent = 'Siguiente tema';
+    else if (digalo.running) btnStart.textContent = 'Pausar';
+    else if (digalo.remaining < digalo.duration * 1000) btnStart.textContent = 'Reanudar';
+    else btnStart.textContent = 'Iniciar';
+
+    document.querySelectorAll('.duration-chip').forEach(chip => {
+      chip.classList.toggle('active', parseInt(chip.dataset.sec) === digalo.duration);
+      chip.disabled = digalo.running;
+    });
+  }
+
+  // Evita que la pantalla se apague mientras corre el cronómetro
+  async function requestWakeLock() {
+    try {
+      if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
+    } catch (e) {}
+  }
+
+  function releaseWakeLock() {
+    if (wakeLock) {
+      wakeLock.release().catch(() => {});
+      wakeLock = null;
+    }
+  }
+
+  document.querySelectorAll('.duration-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      if (digalo.running) return;
+      vibrate(20);
+      digalo.duration = parseInt(chip.dataset.sec);
+      localStorage.setItem('ji2026_digalo_time', digalo.duration);
+      resetTimer();
     });
   });
-  
+
+  $('btn-digalo-start').addEventListener('click', () => {
+    if (digalo.finished) nextTopic();
+    else if (digalo.running) pauseTimer();
+    else startTimer();
+  });
+  $('btn-digalo-reset').addEventListener('click', () => { vibrate(20); resetTimer(); });
+  $('btn-digalo-next').addEventListener('click', nextTopic);
+  $('btn-back-digalo').addEventListener('click', () => navBack('comp'));
+  $('card-digalo').addEventListener('click', openDigalo);
+
+  // Events
+  $('card-home-ji').addEventListener('click', () => { vibrate(20); currentSection = 'ji'; showScreen('categories'); });
+  $('card-home-comp').addEventListener('click', () => { vibrate(20); currentSection = 'comp'; showScreen('comp'); });
+  $('btn-back-ji').addEventListener('click', () => navBack('home'));
+  $('btn-back-comp').addEventListener('click', () => navBack('home'));
+
+  document.querySelectorAll('.category-card[data-category]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cat = btn.dataset.category;
+      if (isErrorsCat(cat) && getRepasarErrores(cat).length === 0) {
+        showConfirmModal('Lista Vacía', 'Aquí podrás repasar las preguntas que no te sepas. Se guardarán automáticamente cuando te equivoques en otras categorías.', 'Entendido', null);
+        return;
+      }
+      startCategory(cat);
+    });
+  });
+
   $('btn-reveal').addEventListener('click', () => {
     vibrate(20);
     $('answer-section').classList.remove('hidden');
     $('btn-reveal').classList.add('hidden');
     $('action-score').classList.remove('hidden');
   });
-  
+
   $('btn-correct').addEventListener('click', () => handleScore(true));
-  $('btn-wrong').addEventListener('click', () => handleScore(false)); 
-  
+  $('btn-wrong').addEventListener('click', () => handleScore(false));
+
   $('btn-back').addEventListener('click', goHome);
   $('btn-restart').addEventListener('click', () => {
     vibrate(20);
@@ -696,24 +929,22 @@
   $('btn-clear-errores').addEventListener('click', () => {
     vibrate(20);
     showConfirmModal('¿Vaciar Lista?', 'Se eliminarán todas las preguntas que has guardado para repasar. Esta acción no se puede deshacer.', 'Sí, vaciar lista', () => {
-      clearRepasarErrores();
-      initCategories();
-      showScreen('categories');
+      clearRepasarErrores(currentCategory);
+      goHome();
     });
   });
   $('btn-delete-error').addEventListener('click', () => {
     vibrate(20);
     showConfirmModal('¿Eliminar pregunta?', 'Esta pregunta se quitará de tu lista de repaso.', 'Sí, eliminar', () => {
       const q = state.shuffled[state.currentIndex];
-      removeFromRepasarErrores(q.q);
-      
+      removeFromRepasarErrores(currentCategory, q.q);
+
       state.shuffled.splice(state.currentIndex, 1);
       state.answers.splice(state.currentIndex, 1);
       $('quiz-total').textContent = state.shuffled.length;
-      
+
       if (state.shuffled.length === 0) {
-        initCategories();
-        showScreen('categories');
+        goHome();
       } else {
         if (state.currentIndex >= state.shuffled.length) {
            state.currentIndex = state.shuffled.length - 1;
@@ -723,28 +954,39 @@
     });
   });
   $('btn-home').addEventListener('click', goHome);
-  
-  $('btn-repaso').addEventListener('click', () => {
-    vibrate(20);
-    initRepaso();
-    $('repaso-search').value = '';
-    showScreen('repaso');
+
+  ['btn-repaso', 'btn-repaso-comp'].forEach(id => {
+    $(id).addEventListener('click', () => {
+      vibrate(20);
+      initRepaso();
+      $('repaso-search').value = '';
+      showScreen('repaso');
+    });
   });
   $('btn-back-repaso').addEventListener('click', goHome);
 
-  if ($('btn-clear-repaso-home')) {
-    $('btn-clear-repaso-home').addEventListener('click', () => {
+  Object.values(ERRORS_CAT).forEach(cat => {
+    $('btn-clear-' + cat).addEventListener('click', () => {
       vibrate(20);
       showConfirmModal('¿Vaciar Lista?', 'Se eliminarán todas las preguntas que has guardado para repasar. Esta acción no se puede deshacer.', 'Sí, vaciar lista', () => {
-        clearRepasarErrores();
-        initCategories();
+        clearRepasarErrores(cat);
+        initMenu();
       });
     });
-  }
+  });
 
   // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
-    if (screens.quiz.classList.contains('active')) {
+    if (screens.digalo.classList.contains('active')) {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        $('btn-digalo-start').click();
+      } else if (e.code === 'ArrowRight') {
+        $('btn-digalo-next').click();
+      } else if (e.code === 'Escape') {
+        $('btn-back-digalo').click();
+      }
+    } else if (screens.quiz.classList.contains('active')) {
       if (e.code === 'Space' && !$('btn-reveal').classList.contains('hidden')) {
         e.preventDefault();
         $('btn-reveal').click();
@@ -834,6 +1076,18 @@
     if (settings.vibration) vibrate(20);
   });
 
+  const toggleTheme = $('toggle-theme');
+  if (toggleTheme) toggleTheme.checked = document.documentElement.dataset.theme === 'light';
+
+  toggleTheme?.addEventListener('change', (e) => {
+    const light = e.target.checked;
+    if (light) document.documentElement.dataset.theme = 'light';
+    else delete document.documentElement.dataset.theme;
+    document.querySelector('meta[name="theme-color"]').content = light ? '#f4f5fb' : '#0a0a1a';
+    localStorage.setItem('ji2026_theme', light ? 'light' : 'dark');
+    vibrate(20);
+  });
+
   $('btn-settings')?.addEventListener('click', () => {
     vibrate(20);
     $('modal-settings').classList.remove('hidden');
@@ -845,7 +1099,7 @@
   });
 
   // Init
-  initCategories();
+  initHome();
   const footerYearEl = $('footer-year');
   if (footerYearEl) footerYearEl.textContent = new Date().getFullYear();
 })();

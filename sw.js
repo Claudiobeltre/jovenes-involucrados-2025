@@ -1,10 +1,11 @@
-const CACHE_NAME = 'ji2026-v35';
+const CACHE_NAME = 'ji2026-v36';
 const STATIC_ASSETS = [
   '/',
   './index.html',
   './styles.css',
   './app.js',
   './questions.js',
+  './competencia.js',
   './manifest.json',
   './assets/icons/icon.svg',
   './assets/icons/icon-192.png',
