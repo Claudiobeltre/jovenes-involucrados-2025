@@ -476,6 +476,77 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 }
 .repaso-item.open .repaso-answer { display: block; animation: fadeIn .3s ease; }
 
+.answer-cita {
+  margin-top: .75rem; font-size: .85rem; font-weight: 600; color: #34d399;
+}
+
+/* ========== HOME ========== */
+.home-grid {
+  display: flex; flex-direction: column; gap: 1rem;
+  padding: 0 1.25rem 2.5rem; max-width: 540px; margin: 0 auto; width: 100%;
+}
+.home-card { padding: 2.25rem 1.25rem; text-align: center; }
+.home-card .card-icon { font-size: 3rem; }
+.home-card .card-title { font-size: 1.3rem; }
+.home-card .card-count { font-size: .85rem; color: rgba(255,255,255,.45); }
+.home-card--comp {
+  background: linear-gradient(135deg, rgba(245,158,11,.1), rgba(234,88,12,.06));
+  border-color: rgba(245,158,11,.25);
+}
+.home-card--comp:hover, .home-card--comp:focus-visible {
+  border-color: rgba(245,158,11,.55); box-shadow: 0 12px 40px rgba(245,158,11,.18);
+}
+
+/* ========== COMPETENCIA ========== */
+.hero-glow--comp { background: radial-gradient(circle, rgba(245,158,11,.22) 0%, transparent 70%); }
+.hero-title--comp { background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 50%, #ea580c 100%); -webkit-background-clip: text; background-clip: text; }
+.category-card--digalo {
+  background: linear-gradient(135deg, rgba(245,158,11,.12), rgba(234,88,12,.08));
+  border-color: rgba(245,158,11,.25);
+}
+
+/* ========== DÍGALO COMO PUEDA ========== */
+.digalo-body {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1.5rem;
+  padding: 1rem 1.25rem; max-width: 540px; margin: 0 auto; width: 100%;
+}
+.duration-chips { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center; }
+.duration-chip {
+  padding: .45rem .95rem; border-radius: 2rem;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+  color: #fff; font-family: inherit; font-size: .85rem; font-weight: 600;
+  cursor: pointer; transition: all .2s;
+}
+.duration-chip.active {
+  background: linear-gradient(135deg, #f59e0b, #ea580c);
+  border-color: rgba(245,158,11,.5); box-shadow: 0 4px 15px rgba(245,158,11,.3);
+}
+.duration-chip:disabled { opacity: .4; cursor: not-allowed; }
+.duration-chip.active:disabled { opacity: .85; }
+.digalo-card {
+  width: 100%; text-align: center; padding: 1.75rem 1.25rem; border-radius: 1.25rem;
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+}
+.digalo-card .question-meta { justify-content: center; }
+.digalo-topic {
+  font-size: clamp(1.7rem, 7vw, 2.4rem); font-weight: 900; line-height: 1.2;
+  letter-spacing: -.02em; color: #fff; margin: .25rem 0 .75rem;
+}
+.digalo-context { font-size: .9rem; color: rgba(255,255,255,.5); line-height: 1.5; }
+.timer-ring-container { position: relative; width: 190px; height: 190px; }
+.timer-ring-fill {
+  stroke: #f59e0b; stroke-dasharray: 327; stroke-dashoffset: 0;
+  transition: stroke-dashoffset .15s linear, stroke .3s;
+}
+.timer-time { font-size: 2.8rem; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.timer--warning .timer-ring-fill { stroke: #ef4444; }
+.timer--warning .timer-time { color: #f87171; }
+.time-up { animation: timeUp .5s ease 3; border-radius: 1.25rem; }
+@keyframes timeUp {
+  0%, 100% { background: transparent; }
+  50% { background: rgba(239,68,68,.25); }
+}
+
 /* ========== RESPONSIVE ========== */
 @media (max-width: 480px) {
   .btn-prev, .btn-next-float {

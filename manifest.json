@@ -1,7 +1,7 @@
 {
-  "name": "Jóvenes Involucrados 2026",
-  "short_name": "JI 2026",
-  "description": "App de preguntas y respuestas para la iglesia",
+  "name": "Competencia Bíblica",
+  "short_name": "Competencia",
+  "description": "Competencia Bíblica IBCJ 2026: Jóvenes Involucrados, preguntas de la Competencia y Dígalo como pueda",
   "start_url": "/?source=pwa",
   "id": "/?source=pwa",
   "scope": "/",

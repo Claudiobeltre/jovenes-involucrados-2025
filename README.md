@@ -1,8 +1,11 @@
-# Jóvenes Involucrados 2026 - App de Preguntas y Respuestas
+# Competencia Bíblica — IBCJ 2026
 
-![Banner](https://img.shields.io/badge/Estado-Producci%C3%B3n-success?style=for-the-badge) ![Versión](https://img.shields.io/badge/Versi%C3%B3n-2.0.0-blue?style=for-the-badge) ![PWA](https://img.shields.io/badge/PWA-Ready-f59e0b?style=for-the-badge)
+![Banner](https://img.shields.io/badge/Estado-Producci%C3%B3n-success?style=for-the-badge) ![Versión](https://img.shields.io/badge/Versi%C3%B3n-3.0.0-blue?style=for-the-badge) ![PWA](https://img.shields.io/badge/PWA-Ready-f59e0b?style=for-the-badge)
 
-Una **Progressive Web App (PWA)** diseñada para que los jóvenes de la Iglesia Bautista Cristo Jesús (IBCJ) puedan estudiar y repasar las preguntas del retiro "Jóvenes Involucrados 2026" de forma interactiva y desde cualquier dispositivo.
+Una **Progressive Web App (PWA)** diseñada para que los jóvenes de la Iglesia Bautista Cristo Jesús (IBCJ) puedan estudiar y prepararse de forma interactiva y desde cualquier dispositivo. Tiene dos apartados:
+
+*   **Jóvenes Involucrados:** las preguntas del retiro "Jóvenes Involucrados 2026".
+*   **Competencia IBCJ:** las 99 preguntas de la competencia bíblica (con su cita RVR1960) y el juego **Dígalo como pueda**, con 159 temas (personajes, lugares y objetos), cronómetro configurable y alarma al terminar el tiempo.
 
 ## 🚀 Características Principales
 
@@ -12,15 +15,20 @@ Una **Progressive Web App (PWA)** diseñada para que los jóvenes de la Iglesia 
 *   **Modo Listado y Búsqueda:** Una pantalla dedicada para leer todas las 152 preguntas de corrido, con un buscador en tiempo real para encontrar rápidamente por palabras clave o lección, separado por pestañas temáticas.
 *   **Guardado Automático de Progreso:** La aplicación guarda tu avance localmente. Puedes cerrar la app y al volver retomarás exactamente en la pregunta donde te quedaste.
 *   **Sistema de Rachas (Streaks) 🔥:** Registra cuántos días consecutivos has entrado a estudiar para mantenerte motivado.
+*   **Dígalo como pueda ⏱️:** Sale un tema al azar con una pista de contexto; el cronómetro (30 s, 1 min, 1:30 o 2 min) se inicia con un botón, avisa con tics en los últimos 5 segundos y suena una alarma al llegar a cero. Los temas no se repiten hasta que salgan todos.
 *   **Feedback Visual Animado:** Anillo circular de puntaje al completar categorías y lluvia de confetti animado al terminar el repaso de una sección.
 
 ## 🗂️ Categorías de Estudio
 
-La base de datos contiene un total de 152 preguntas divididas en:
+**Jóvenes Involucrados** (`questions.js`) contiene 152 preguntas divididas en:
 *   📖 **Hora Silenciosa** (28 preguntas)
-*   ✝️ **Disipulado** (50 preguntas)
+*   ✝️ **Discipulado** (50 preguntas)
 *   📜 **Memorización (Versículos)** (14 preguntas)
 *   📚 **Lecciones** (60 preguntas)
+
+**Competencia IBCJ** (`competencia.js`):
+*   ❓ **Preguntas** (99 preguntas con cita bíblica)
+*   ⏱️ **Dígalo como pueda** (159 temas: 96 personajes y grupos, 32 lugares, 31 objetos)
 
 ## 🛠️ Tecnologías Usadas
 
@@ -36,7 +44,7 @@ Si deseas correr este proyecto en tu propia computadora o hacer modificaciones, 
 
 1. Clona el repositorio:
    ```bash
-   git clone https://github.com/Natanael-1a2b/jovenes-involucrados-2025.git
+   git clone https://github.com/Claudiobeltre/jovenes-involucrados-2025.git
    cd jovenes-involucrados-2025
    ```
 
