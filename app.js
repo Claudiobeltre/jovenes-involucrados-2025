@@ -644,7 +644,7 @@
     list.innerHTML = '';
 
     if (questions.length === 0) {
-      list.innerHTML = `<div style="text-align:center; padding: 2rem; color: rgba(255,255,255,.5);">No se encontraron preguntas.</div>`;
+      list.innerHTML = `<div style="text-align:center; padding: 2rem; opacity: .5;">No se encontraron preguntas.</div>`;
       return;
     }
 
@@ -1074,6 +1074,18 @@
     settings.vibration = e.target.checked;
     localStorage.setItem('ji2026_vibration', settings.vibration);
     if (settings.vibration) vibrate(20);
+  });
+
+  const toggleTheme = $('toggle-theme');
+  if (toggleTheme) toggleTheme.checked = document.documentElement.dataset.theme === 'light';
+
+  toggleTheme?.addEventListener('change', (e) => {
+    const light = e.target.checked;
+    if (light) document.documentElement.dataset.theme = 'light';
+    else delete document.documentElement.dataset.theme;
+    document.querySelector('meta[name="theme-color"]').content = light ? '#f4f5fb' : '#0a0a1a';
+    localStorage.setItem('ji2026_theme', light ? 'light' : 'dark');
+    vibrate(20);
   });
 
   $('btn-settings')?.addEventListener('click', () => {

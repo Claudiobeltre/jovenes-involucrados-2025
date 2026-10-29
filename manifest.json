@@ -1,7 +1,7 @@
 {
-  "name": "Competencia Bíblica",
+  "name": "Competencia",
   "short_name": "Competencia",
-  "description": "Competencia Bíblica IBCJ 2026: Jóvenes Involucrados, preguntas de la Competencia y Dígalo como pueda",
+  "description": "Competencia IBCJ 2026: Jóvenes Involucrados, preguntas de la Competencia y Dígalo como pueda",
   "start_url": "/?source=pwa",
   "id": "/?source=pwa",
   "scope": "/",

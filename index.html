@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Competencia Bíblica — IBCJ 2026</title>
-    <meta name="description" content="Competencia Bíblica IBCJ 2026: preguntas de Jóvenes Involucrados, preguntas de la Competencia IBCJ y Dígalo como pueda">
+    <title>Competencia — IBCJ 2026</title>
+    <meta name="description" content="Competencia IBCJ 2026: preguntas de Jóvenes Involucrados, preguntas de la Competencia IBCJ y Dígalo como pueda">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -16,6 +16,15 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0a0a1a">
+    <script>
+        // Aplicar el tema antes de pintar para evitar parpadeo
+        try {
+            if (localStorage.getItem('ji2026_theme') === 'light') {
+                document.documentElement.dataset.theme = 'light';
+                document.querySelector('meta[name="theme-color"]').content = '#f4f5fb';
+            }
+        } catch (e) {}
+    </script>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -35,7 +44,7 @@
         </div>
         <div class="hero-header">
             <div class="hero-glow"></div>
-            <h1 class="hero-title">Competencia Bíblica</h1>
+            <h1 class="hero-title">Competencia</h1>
             <p class="hero-subtitle">IBCJ 2026</p>
             <div class="streak-badge" id="streak-badge">
                 <span class="streak-fire">🔥</span>
@@ -63,7 +72,7 @@
             <div class="footer-inner">
                 <!-- Left: Brand -->
                 <div class="footer-section footer-brand">
-                    <span class="footer-app-name">Competencia Bíblica</span>
+                    <span class="footer-app-name">Competencia</span>
                     <span class="footer-version">v3.0</span>
                 </div>
 
@@ -322,6 +331,16 @@
                     </div>
                     <label class="toggle-switch">
                         <input type="checkbox" id="toggle-vibration">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-icon">☀️</div>
+                        <div class="setting-text">Tema claro</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-theme">
                         <span class="toggle-slider"></span>
                     </label>
                 </div>

@@ -1,4 +1,4 @@
-# Competencia Bíblica — IBCJ 2026
+# Competencia — IBCJ 2026
 
 ![Banner](https://img.shields.io/badge/Estado-Producci%C3%B3n-success?style=for-the-badge) ![Versión](https://img.shields.io/badge/Versi%C3%B3n-3.0.0-blue?style=for-the-badge) ![PWA](https://img.shields.io/badge/PWA-Ready-f59e0b?style=for-the-badge)
 

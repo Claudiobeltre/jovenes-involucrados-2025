@@ -82,7 +82,7 @@ const COMP_QUESTIONS = {
     { "num": 77, "q": "¿Qué dijo Jesús que necesita una persona para ver el reino de Dios?", "a": "Nacer de nuevo.", "cita": "Juan 3:3" },
     { "num": 78, "q": "¿De qué lugar era la mujer a quien encontró Jesús junto al pozo de Jacob?", "a": "Samaria.", "cita": "Juan 4:6-9" },
     { "num": 79, "q": "¿Cuántos años llevaba enfermo el hombre que Jesús sanó en Betesda?", "a": "Treinta y ocho años.", "cita": "Juan 5:5-9" },
-    { "num": 80, "q": "¿Qué respondió Pedro cuando Jesús preguntó si también ellos querían irse?", "a": "¿A quién iremos? Solo tú tienes palabras de vida eterna.", "cita": "Juan 6:67-68" },
+    { "num": 80, "q": "¿Qué respondió Pedro cuando Jesús preguntó si también ellos querían irse?", "a": "¿A quién iremos, si solo tú tienes palabras de vida eterna?", "cita": "Juan 6:67-68" },
     { "num": 81, "q": "¿A qué lugar envió Jesús a un ciego cuando le untó lodo en los ojos para que fuera sanado?", "a": "Al estanque de Siloé (que traducido es, Enviado).", "cita": "Juan 9:1-7" },
     { "num": 82, "q": "¿Qué rey de Israel fue reprendido por perdonar la vida de un enemigo destinado a destrucción, y quién era ese enemigo?", "a": "Acab; Ben-adad, rey de Siria.", "cita": "1 Reyes 20:32-43" },
     { "num": 83, "q": "¿Qué sacerdote encontró el libro de la ley durante las reparaciones del templo en tiempos de Josías?", "a": "Hilcías.", "cita": "2 Reyes 22:8-11" },
